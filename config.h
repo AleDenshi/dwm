@@ -3,6 +3,8 @@
 /* default programs */
 #define TERMINAL "st"
 #define TERMCLASS "St"
+#define SCREENSAVER "slock"
+#define DISPLAY "arandr"
 #define BROWSER "chromium"
 #define EXPLORER "pcmanfm"
 #define MESSENGER "gajim"
@@ -90,7 +92,9 @@ static const Key keys[] = {
 	{ 0, XF86XK_MonBrightnessUp,	spawn,	   SHCMD("xbacklight -inc 5") },
 	{ 0, XF86XK_MonBrightnessDown,	spawn,	   SHCMD("xbacklight -dec 5") },
 	/* Launch arandr with dislay button */
-	{ 0, XF86XK_Display,			spawn,	   SHCMD("arandr") },
+	{ 0, XF86XK_Display,			spawn,	   SHCMD(DISPLAY) },
+	/* Open the screensaver with the key */
+	{ 0, XF86XK_ScreenSaver,		spawn,	   SHCMD(SCREENSAVER) },
 	/* Preference Apps */
 	{ MODKEY, 						XK_t,	   spawn,		   SHCMD(TERMINAL) },
 	{ MODKEY, 						XK_w,	   spawn,	       SHCMD(BROWSER) },
