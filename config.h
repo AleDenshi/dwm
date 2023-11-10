@@ -5,7 +5,7 @@
 #define TERMCLASS "St"
 #define SCREENSAVER "slock"
 #define DISPLAY "arandr"
-#define BROWSER "chromium"
+#define BROWSER "firefox"
 #define EXPLORER "pcmanfm"
 #define MESSENGER "gajim"
 
