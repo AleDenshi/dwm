@@ -1,13 +1,18 @@
 /* See LICENSE file for copyright and license details. */
 
-/* default programs */
+/* Enable special function keys */
+#include <X11/XF86keysym.h>
+
+/* Default programs */
 #define TERMINAL "st"
 #define TERMCLASS "St"
-#define SCREENSAVER "slock"
-#define DISPLAY "arandr"
 #define BROWSER "firefox"
 #define EXPLORER "pcmanfm"
 #define MESSENGER "gajim"
+#define SCREENSHOT "screenshot"
+#define PASSMENU "~/.local/bin/passmenu"
+#define DISPLAY "arandr"
+#define SCREENSAVER "xscreensaver"
 
 /* appearance */
 static const unsigned int borderpx  = 0;        /* border pixel of windows */
@@ -42,8 +47,8 @@ static const Rule rules[] = {
 	 *	WM_NAME(STRING) = title
 	 */
 	/* class      instance    title       tags mask     isfloating   monitor */
-	{ TERMCLASS,  "spcalc",   NULL,  	  0,     		1,           -1 },
-	{ "Firefox0", NULL,       NULL,       1 << 8,       0,           -1 },
+	{ "Gimp",     NULL,       NULL,       0,            1,           -1 },
+	{ "Firefox",  NULL,       NULL,       1 << 8,       0,           -1 },
 };
 
 /* layout(s) */
@@ -71,37 +76,30 @@ static const Layout layouts[] = {
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
 /* commands */
-static const char *dmenucmd[] = { "dmenu_run", "-fn", dmenufont, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbordercolor, "-sf", selfgcolor, NULL };
+static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
+static const char *dmenucmd[] = { "dmenu_run", "-fn", dmenufont, "-nb", normbgcolor, "-nf", normfgcolor,
+"-sb", selbordercolor, "-sf", selfgcolor, NULL };
 static const char *termcmd[]  = { "st", NULL };
-
-#include <X11/XF86keysym.h>
 
 static const Key keys[] = {
 	/* modifier                     key        function        argument */
 	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
-	/* Media control keys */
-	{ 0, XF86XK_AudioMute,			spawn,	   SHCMD("pactl set-sink-mute 0 toggle") },
-	{ 0, XF86XK_AudioRaiseVolume,	spawn,	   SHCMD("pactl set-sink-volume 0 +5%") },
-	{ 0, XF86XK_AudioLowerVolume,	spawn,	   SHCMD("pactl set-sink-volume 0 -5%") },
-	{ 0, XF86XK_AudioMicMute,		spawn,	   SHCMD("pactl set-source-mute 0 toggle") },
-	/* Scripts to run */
-	{ 0, XK_Print,					spawn,	   SHCMD("screenshot") },
-	{ 0, XF86XK_RotateWindows,	    spawn,	   SHCMD("rotate-right") },
-	{ MODKEY, 						XK_o,	   spawn,	   SHCMD("passmenu") },
-	/* Brightness control keys */
-	{ 0, XF86XK_MonBrightnessUp,	spawn,	   SHCMD("xbacklight -inc 5") },
-	{ 0, XF86XK_MonBrightnessDown,	spawn,	   SHCMD("xbacklight -dec 5") },
-	/* Launch arandr with dislay button */
-	{ 0, XF86XK_Display,			spawn,	   SHCMD(DISPLAY) },
+	{ MODKEY,                       XK_t,      spawn,          SHCMD(TERMINAL) },
+    { MODKEY,                       XK_w,      spawn,          SHCMD(BROWSER) },
+    { MODKEY,                       XK_e,      spawn,          SHCMD(EXPLORER) },
+    { MODKEY,                       XK_o,      spawn,          SHCMD(PASSMENU) },
+    { 0,                            XK_Print,  spawn,          SHCMD(SCREENSHOT) },
+	{ 0, 			 XF86XK_Messenger,		   spawn,	       SHCMD(MESSENGER) },
+    /* Launch arandr with dislay button */
+	{ 0, 			 XF86XK_Display,		   spawn,	   	   SHCMD(DISPLAY) },
 	/* Open the screensaver with the key */
-	{ 0, XF86XK_ScreenSaver,		spawn,	   SHCMD(SCREENSAVER) },
-	/* Preference Apps */
-	{ MODKEY, 						XK_t,	   spawn,		   SHCMD(TERMINAL) },
-	{ MODKEY, 						XK_w,	   spawn,	       SHCMD(BROWSER) },
-	{ MODKEY, 						XK_e,	   spawn,	       SHCMD(EXPLORER) },
-	{ 0, XF86XK_Messenger,			spawn,	   SHCMD(MESSENGER) },
-	{ 0, XF86XK_WWW,		        spawn,	   SHCMD(BROWSER) },
-	/* Regular dwm keys */
+	{ 0, 			 XF86XK_ScreenSaver,	   spawn,	       SHCMD(SCREENSAVER) },
+    { 0,             XF86XK_AudioLowerVolume,  spawn,          SHCMD("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-") },
+    { 0,             XF86XK_AudioRaiseVolume,  spawn,          SHCMD("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+") },
+    { 0,             XF86XK_AudioMute,         spawn,          SHCMD("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle") },
+	{ 0,             XF86XK_AudioMicMute,	   spawn,	       SHCMD("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle") },
+    { 0,             XF86XK_MonBrightnessUp,   spawn,          SHCMD("xbacklight -inc 5") },
+    { 0,             XF86XK_MonBrightnessDown, spawn,          SHCMD("xbacklight -dec 5") },
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
 	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
@@ -111,11 +109,10 @@ static const Key keys[] = {
 	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.05} },
 	{ MODKEY,                       XK_Return, zoom,           {0} },
 	{ MODKEY,                       XK_Tab,    view,           {0} },
-	/* Alt + F4 to close windows */
-	{ Mod1Mask,                     XK_F4,     killclient,     {0} },
-	{ MODKEY|ShiftMask,             XK_t,      setlayout,      {.v = &layouts[0]} },
-	{ MODKEY|ShiftMask,             XK_f,      setlayout,      {.v = &layouts[1]} },
-	{ MODKEY|ShiftMask,             XK_m,      setlayout,      {.v = &layouts[2]} },
+	{ Mod1Mask,                             XK_F4,     killclient,     {0} },
+	{ MODKEY,                       XK_r,      setlayout,      {.v = &layouts[0]} },
+	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[1]} },
+	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
 	{ MODKEY,                       XK_space,  setlayout,      {0} },
 	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
 	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
@@ -141,8 +138,8 @@ static const Key keys[] = {
 /* click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
 static const Button buttons[] = {
 	/* click                event mask      button          function        argument */
-	{ ClkTagBar,            MODKEY,         Button1,        tag,            {0} },
-	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
+	{ ClkLtSymbol,          0,              Button1,        setlayout,      {0} },
+	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} },
 	{ ClkWinTitle,          0,              Button2,        zoom,           {0} },
 	{ ClkStatusText,        0,              Button2,        spawn,          {.v = termcmd } },
 	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
